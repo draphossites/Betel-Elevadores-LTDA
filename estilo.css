@@ -4,3 +4,30 @@
 
 /* Menu aberto apenas quando solicitado. */
 .mobile-nav[hidden] { display: none; }
+
+/* A imagem enviada inclui margens claras em volta da marca. */
+.brand-image {
+  --brand-image-scale: 1;
+  position: relative;
+  display: inline-block;
+  width: calc(153px * var(--brand-image-scale));
+  height: calc(50px * var(--brand-image-scale));
+  overflow: hidden;
+}
+
+.brand-image img {
+  position: absolute;
+  top: calc(-15px * var(--brand-image-scale));
+  left: calc(-8px * var(--brand-image-scale));
+  width: calc(175px * var(--brand-image-scale));
+  height: calc(76px * var(--brand-image-scale));
+  max-width: none;
+}
+
+.site-header .brand-image { mix-blend-mode: darken; }
+.site-footer .brand-image { mix-blend-mode: screen; }
+.site-footer .brand-image img { filter: invert(1) grayscale(1) contrast(1.3); }
+
+@media (max-width: 767px) {
+  .site-header .brand-image { --brand-image-scale: .86; }
+}
