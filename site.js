@@ -1,45 +1,53 @@
-const quote = document.querySelector('#orcamento');
-const service = document.querySelector('#servico');
-const phone = quote.elements.telefone;
+const header = document.querySelector('.site-header');
+const menuToggle = header.querySelector('.mobile-menu-toggle');
+const mobileNav = header.querySelector('.desktop-nav').cloneNode(true);
+const quoteLink = header.querySelector('.header-cta');
 
-document.querySelectorAll('[data-service]').forEach(link => {
-  link.addEventListener('click', () => {
-    service.value = link.dataset.service;
-  });
+mobileNav.id = 'menu-mobile';
+mobileNav.className = 'mobile-nav';
+mobileNav.hidden = true;
+mobileNav.append(quoteLink.cloneNode(true));
+mobileNav.lastElementChild.classList.remove('header-cta');
+menuToggle.setAttribute('aria-controls', mobileNav.id);
+header.append(mobileNav);
+
+function setMenu(open) {
+  mobileNav.hidden = !open;
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+}
+
+menuToggle.addEventListener('click', () => setMenu(mobileNav.hidden));
+mobileNav.addEventListener('click', event => {
+  if (event.target.closest('a')) setMenu(false);
+});
+header.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !mobileNav.hidden) {
+    setMenu(false);
+    menuToggle.focus();
+  }
 });
 
-phone.addEventListener('input', () => phone.setCustomValidity(''));
+const quote = document.querySelector('.contact-form');
 
 quote.addEventListener('submit', event => {
   event.preventDefault();
   const fields = new FormData(quote);
-  const name = fields.get('nome').trim();
-  const company = fields.get('empresa').trim();
-  const number = fields.get('telefone').trim();
-  const digits = number.replace(/\D/g, '');
+  const name = fields.get('name').trim();
+  const company = fields.get('company').trim();
+  const phone = fields.get('phone').trim();
+  const service = fields.get('service');
 
-  if (!name) {
-    quote.elements.nome.value = '';
-    quote.elements.nome.reportValidity();
-    return;
-  }
-
-  if (!/^(?:55)?\d{10,11}$/.test(digits)) {
-    phone.setCustomValidity('Informe um número com DDD.');
-    phone.reportValidity();
-    return;
-  }
-
+  const recipient = new URL(quoteLink.href);
+  const introduction = recipient.searchParams.get('text');
   const message = [
-    'Olá, gostaria de solicitar um orçamento com a Betel Elevadores.',
+    introduction,
     '',
     `Nome: ${name}`,
-    ...(company ? [`Condomínio ou empresa: ${company}`] : []),
-    `WhatsApp: ${number}`,
-    `Serviço: ${fields.get('servico')}`
+    `Condomínio / Empresa: ${company}`,
+    `Telefone / WhatsApp: ${phone}`,
+    `Tipo de serviço: ${service}`
   ];
-
-  const url = new URL(quote.action);
-  url.searchParams.set('text', message.join('\n'));
-  window.open(url.href, '_blank', 'noopener,noreferrer');
+  recipient.searchParams.set('text', message.join('\n'));
+  window.open(recipient.href, '_blank', 'noopener,noreferrer');
 });
